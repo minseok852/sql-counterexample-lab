@@ -1,0 +1,33 @@
+{
+  "name": "sql-counterexample-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "server": "tsx server/index.ts",
+    "dev:ai": "concurrently --kill-others \"node scripts/dev-ai.mjs\" \"tsx watch server/index.ts\"",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort"
+  },
+  "dependencies": {
+    "@sqlite.org/sqlite-wasm": "*",
+    "express": "*",
+    "react": "*",
+    "react-dom": "*",
+    "zod": "*"
+  },
+  "devDependencies": {
+    "@playwright/test": "*",
+    "@types/express": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@vitejs/plugin-react": "*",
+    "concurrently": "*",
+    "tsx": "*",
+    "typescript": "*",
+    "vite": "*",
+    "vitest": "*"
+  }
+}

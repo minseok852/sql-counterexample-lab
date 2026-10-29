@@ -1,0 +1,8 @@
+import type{Cell,Result}from'./compare';
+export type ColumnInfo={name:string,type:string,nullable:boolean,primaryKey:boolean};
+export type Snapshot={tables:Record<string,Record<string,Cell>[]>,tableColumns:Record<string,string[]>,tableSchema:Record<string,ColumnInfo[]>};
+export type ViewMode='table'|'text';
+export function resultText(result:Result){return ['컬럼: '+result.columns.join(' | '),`행 수: ${result.rows.length}`,...result.rows.map((row,index)=>`${index+1}. `+row.map(cell=>cellLabel(cell).text).join(' | ')),...(!result.rows.length?['빈 결과 (0행)']:[])].join('\n');}
+export function snapshotText(snapshot:Snapshot){return Object.entries(snapshot.tables).map(([name,rows])=>['테이블: '+name,...snapshot.tableSchema[name].map(c=>`  ${c.name}: ${c.type||'자료형 미지정'} · NULL ${c.nullable?'허용':'불가'}${c.primaryKey?' · 기본 키':''}`),resultText({columns:snapshot.tableColumns[name],rows:rows.map(row=>snapshot.tableColumns[name].map(column=>row[column]))})].join('\n')).join('\n\n');}
+export function cellLabel(value:Cell){return value===null?{text:'NULL · 값 없음',kind:'null'}:typeof value==='string'?{text:value===''?'"" · 빈 문자열':JSON.stringify(value),kind:'string'}:{text:String(value),kind:'number'};}
+export function duplicateCounts(actual:Result,expected:Result){const counts=(rows:Cell[][])=>{const map=new Map<string,number>();for(const row of rows){const key=JSON.stringify(row);map.set(key,(map.get(key)||0)+1)}return map};const a=counts(actual.rows),e=counts(expected.rows);return [...new Set([...a.keys(),...e.keys()])].filter(k=>(a.get(k)||0)!==(e.get(k)||0)).map(k=>({row:JSON.parse(k)as Cell[],actual:a.get(k)||0,expected:e.get(k)||0}));}

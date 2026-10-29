@@ -1,0 +1,14 @@
+import {chromium} from '@playwright/test';
+import {writeFileSync} from 'node:fs';
+const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});const page=await browser.newPage({viewport:{width:1400,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(process.env.APP_URL||'http://127.0.0.1:5174');
+await page.getByRole('button',{name:'실행'}).click();await page.getByRole('heading',{name:'▷ 현재 데이터 실행 결과'}).waitFor();
+await page.getByRole('button',{name:'정답 확인'}).click();await page.getByRole('heading',{name:/검사 2에서/}).waitFor();
+await page.screenshot({path:'qa-desktop.png',fullPage:true});
+await page.locator('#sql').fill('SELECT c.id AS customer, COUNT(o.id) AS n FROM customers c LEFT JOIN orders o ON o.customer_id=c.id AND o.status=\'completed\' GROUP BY c.id ORDER BY c.id DESC');await page.getByRole('button',{name:'정답 확인'}).click();await page.getByRole('heading',{name:'준비된 테스트 5개를 모두 통과했어요'}).waitFor();
+await page.locator('#sql').fill('DROP TABLE customers');await page.getByRole('button',{name:'실행'}).click();await page.getByRole('heading',{name:'! 실행을 완료하지 못했어요'}).waitFor();
+await page.locator('#sql').fill('WITH RECURSIVE x(n) AS (SELECT 1 UNION ALL SELECT n+1 FROM x) SELECT sum(n) FROM x');await page.getByRole('button',{name:'실행'}).click();await page.getByRole('heading',{name:'⏱ 실행 제한'}).waitFor({timeout:10000});
+await page.locator('#sql').fill('SELECT 1');await page.getByRole('button',{name:'실행'}).click();await page.getByRole('heading',{name:'▷ 현재 데이터 실행 결과'}).waitFor();
+await page.route('**/api/ask',route=>route.fulfill({status:503,json:{error:'로컬 AI에 연결하지 못했습니다. 기본 해설은 계속 사용할 수 있습니다.'}}));await page.getByText('풀이 질문하기',{exact:true}).click();await page.locator('#question').fill('<img src=x onerror=alert(1)> 왜 틀렸나요?');await page.getByRole('button',{name:'질문하기',exact:true}).click();await page.getByText(/로컬 AI에 연결하지 못했습니다|AI 연결이 중단됐습니다/).waitFor({timeout:30000});if(await page.locator('.chat img').count())throw Error('XSS');
+await page.setViewportSize({width:390,height:844});await page.screenshot({path:'qa-mobile.png',fullPage:true});
+writeFileSync('qa-browser-results.json',JSON.stringify({passed:['sample','counterexample','correct SQL/order/alias','DDL denied','timeout','recovery','mock AI unavailable','XSS rendered as text','mobile screenshot'],errors},null,2));await browser.close();if(errors.length)process.exitCode=1;

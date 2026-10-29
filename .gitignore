@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.env
+
+.env.local
+.env.*.local
+
+# Local QA artifacts (keep reproduction scripts and documentation)
+/*.png
+/qa-*.json
+.env.*
+!.env.example
+/server/app-before-quality.txt
